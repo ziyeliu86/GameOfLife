@@ -4,6 +4,38 @@ import mpl_toolkits.mplot3d as a3
 import matplotlib.colors as colors
 
 
+def icoshpere(n):
+    v, f = icosahedron()
+    for i in range(n):
+        f_new = np.zeros((f.shape[0]*4, 3)).astype(int)
+        for j in range(f.shape[0]):
+            tri = f[j, :]
+            a, v = split_line(tri[0], tri[1], v)
+            b, v = split_line(tri[1], tri[2], v)
+            c, v = split_line(tri[2], tri[0], v)
+
+            f_new[4*j, :] = [tri[0], a, c]
+            f_new[4*j+1, :] = [tri[1], b, a]
+            f_new[4*j+2, :] = [tri[2], c, b]
+            f_new[4*j+3, :] = [a, b, c]
+        f = f_new
+    v, _, ids = np.unique(
+        v, return_index=True, return_inverse=True,
+        axis=0)
+    f = np.unique(ids[f], axis=0)
+    return v, f
+
+
+def split_line(t1, t2, v):
+    v1 = v[t1, :]
+    v2 = v[t2, :]
+    vm = (v1 + v2) / 2
+    vm = vm / np.linalg.norm(vm)
+    t = v.shape[0]
+    v = np.vstack((v, vm[np.newaxis, :]))
+    return t, v
+
+
 def icosahedron():
     """ICOSAHEDRON creates unit regular icosahedron
     Returns 12 vertex and 20 face values"""
@@ -71,5 +103,5 @@ def plot_polyhedron(v, f):
 
 
 if __name__ == "__main__":
-    v, f = icosahedron()
+    v, f = icoshpere(3)
     plot_polyhedron(v, f)
